@@ -11,6 +11,7 @@ import {
   Sun,
   Moon,
   ChartNoAxesColumnIcon,
+  Users,
 } from "lucide-react";
 import { useState } from "react";
 import { useApp } from "../context/AppContext";
@@ -36,6 +37,11 @@ export default function Navbar() {
       path: "/rank-tracker",
       label: "Rank Tracker",
       icon: <Target size={18} />,
+    },
+    {
+      path: "/competitors",
+      label: "Competitors",
+      icon: <Users size={18} />,
     },
     { path: "/history", label: "History", icon: <History size={18} /> },
   ];

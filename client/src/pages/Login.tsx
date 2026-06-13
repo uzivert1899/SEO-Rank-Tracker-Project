@@ -128,7 +128,7 @@ export default function Login({ state }: { state: string }) {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 mt-5 rounded-lg bg-primary text-sm text-primary-foreground flex items-center justify-center gap-2 hover:opacity-90 transition-opacity disabled:opacity-50"
+              className="w-full py-3 mt-5 rounded-lg bg-primary text-sm text-primary-foreground flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95 transition-all duration-150 disabled:opacity-50"
               id="login-submit-btn"
               style={{ color: "var(--background)" }}
             >

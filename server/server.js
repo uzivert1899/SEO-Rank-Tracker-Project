@@ -5,6 +5,9 @@ import connectDB from "./config/db.js";
 import authRouter from "./routes/authRoutes.js";
 import rankRouter from "./routes/rankRoutes.js";
 import analysisRouter from "./routes/analysisRoutes.js";
+import competitorRouter from "./routes/competitorRoutes.js";
+import reportRouter from "./routes/reportRoutes.js";
+import publicRouter from "./routes/publicRoutes.js";
 
 connectDB();
 const app = express();
@@ -18,6 +21,10 @@ app.use("/api/auth", authRouter);
 console.log("Auth routes loaded");
 app.use("/api/rank", rankRouter);
 app.use("/api/analysis", analysisRouter);
+app.use("/api/competitors", competitorRouter);
+app.use("/api/reports", reportRouter);
+app.use("/api/public", publicRouter);
+console.log("Public routes loaded");
 
 const PORT = process.env.PORT || 5000;
 app.use((err, req, res, next) => {

@@ -169,7 +169,7 @@ export default function Analyze() {
                 </div>
                 <button
                   type="submit"
-                  className="bg-primary px-6 py-3 rounded-full flex items-center gap-2 text-primary-foreground text-sm hover:opacity-90 transition-opacity shrink-0"
+                  className="bg-primary px-6 py-3 rounded-full flex items-center gap-2 text-primary-foreground text-sm hover:scale-[1.02] active:scale-95 transition-all duration-150 shrink-0"
                   id="analyze-submit-btn"
                   style={{ color: "var(--background)" }}
                 >

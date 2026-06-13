@@ -9,6 +9,7 @@ import Report from "./pages/Report";
 import History from "./pages/History";
 import RankTracker from "./pages/RankTracker";
 import RankDetail from "./pages/RankDetail";
+import CompetitorAnalysis from "./pages/CompetitorAnalysis";
 import { Toaster } from "react-hot-toast";
 import { useApp } from "./context/AppContext";
 
@@ -51,6 +52,7 @@ export default function App() {
           <Route path="/history" element={<History />} />
           <Route path="/rank-tracker" element={<RankTracker />} />
           <Route path="/rank/:id" element={<RankDetail />} />
+          <Route path="/competitors" element={<CompetitorAnalysis />} />
         </Route>
       </Routes>
     </>

@@ -15,6 +15,7 @@ import {
   ExternalLink,
   Type,
   Search,
+  Download,
 } from "lucide-react";
 
 import { useApp } from "../context/AppContext";
@@ -81,6 +82,7 @@ export default function Report() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState("overview");
+  const [downloadingPdf, setDownloadingPdf] = useState(false);
 
   const fetchAnalysis = async () => {
     try {
@@ -111,6 +113,32 @@ export default function Report() {
     if (s >= 80) return "score-bg-good";
     if (s >= 50) return "score-bg-medium";
     return "score-bg-poor";
+  };
+
+  const handleDownloadPdf = async () => {
+    try {
+      setDownloadingPdf(true);
+      const response = await api.get(`/api/reports/${id}/pdf`, {
+        responseType: "blob",
+      });
+
+      // Create blob URL and download
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute(
+        "download",
+        `seo-report-${new Date().toISOString().split("T")[0]}.pdf`,
+      );
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode?.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Failed to download PDF:", err);
+    } finally {
+      setDownloadingPdf(false);
+    }
   };
 
   const tabs = [
@@ -194,13 +222,33 @@ export default function Report() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
         {/* Back + Header */}
         <div className="mb-8">
-          <Link
-            to="/dashboard"
-            className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-4 transition-colors"
-          >
-            <ArrowLeft size={16} />
-            Back to Dashboard
-          </Link>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-4">
+            <Link
+              to="/dashboard"
+              className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <ArrowLeft size={16} />
+              Back to Dashboard
+            </Link>
+            <button
+              onClick={handleDownloadPdf}
+              disabled={downloadingPdf}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-primary text-primary-foreground hover:scale-[1.02] active:scale-95 disabled:opacity-50 transition-all duration-150"
+              style={{ color: "var(--background)" }}
+            >
+              {downloadingPdf ? (
+                <>
+                  <div className="size-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                  Generating PDF...
+                </>
+              ) : (
+                <>
+                  <Download size={16} />
+                  Download PDF Report
+                </>
+              )}
+            </button>
+          </div>
           <div className="flex flex-col sm:flex-row sm:items-center gap-3">
             <div className="flex-1 min-w-0">
               <h1 className="text-2xl font-medium text-foreground truncate">

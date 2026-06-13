@@ -1,6 +1,7 @@
 import Analysis from "../models/Analysis.js";
 import { analyzeSeoData } from "../services/geminiService.js";
 import { scrapeUrl } from "../services/scraperService.js";
+import { generateShareId } from "../utils/generateShareId.js";
 
 // Analyze a URL
 export const analyzeUrl = async (req, res) => {
@@ -22,18 +23,32 @@ export const analyzeUrl = async (req, res) => {
         .json({ success: false, message: "Invalid URL format" });
     }
 
-    // Create analysis record with pending status
+    // Create analysis record with pending status and unique shareId
+    let shareId;
+    let isUnique = false;
+
+    // Generate unique shareId
+    while (!isUnique) {
+      shareId = generateShareId();
+      const existing = await Analysis.findOne({ shareId });
+      if (!existing) {
+        isUnique = true;
+      }
+    }
+
     const analysis = await Analysis.create({
       userId: req.userId,
       url: validUrl.href,
+      shareId,
       status: "processing",
     });
 
-    // Send immediate response with analysis ID
+    // Send immediate response with analysis ID and share ID
     res.json({
       success: true,
       message: "Analysis started",
       analysisId: analysis._id,
+      shareId: analysis.shareId,
     });
 
     // Run scraping and analysis in background
@@ -144,6 +159,30 @@ export const deleteAnalysis = async (req, res) => {
     res.json({ success: true, message: "Analysis deleted" });
   } catch (error) {
     console.error("Delete analysis error:", error.message);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+// Get public report by share ID (no authentication required)
+export const getPublicReport = async (req, res) => {
+  try {
+    const { shareId } = req.params;
+
+    const analysis = await Analysis.findOne({ shareId });
+
+    if (!analysis) {
+      return res.status(404).json({
+        success: false,
+        message: "Report not found or access denied",
+      });
+    }
+
+    // Return analysis data without userId for security
+    const { userId, ...reportData } = analysis.toObject();
+
+    res.json({ success: true, analysis: reportData });
+  } catch (error) {
+    console.error("Get public report error:", error.message);
     res.status(500).json({ success: false, message: "Server error" });
   }
 };

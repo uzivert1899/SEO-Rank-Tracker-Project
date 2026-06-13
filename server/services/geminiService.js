@@ -93,3 +93,46 @@ Return only valid JSON, no markdown, no explanation.`;
     return { success: false, error: error.message };
   }
 }
+
+export async function generateCompetitorRecommendations({
+  userMetrics,
+  averageCompetitorMetrics,
+  missingTopics,
+}) {
+  try {
+    const prompt = `You are an SEO strategist. Create concise AI recommendations using ONLY this metrics data. Do not assume any full page content.
+
+User metrics:
+${JSON.stringify(userMetrics, null, 2)}
+
+Average competitor metrics:
+${JSON.stringify(averageCompetitorMetrics, null, 2)}
+
+Missing H2 topics:
+${JSON.stringify(missingTopics, null, 2)}
+
+Return only valid JSON with this exact structure:
+{
+  "strengths": [<string>],
+  "weaknesses": [<string>],
+  "recommendations": [<string>],
+  "priorityActions": [<string>]
+}
+
+Keep the total response under 500 words. Be specific, practical, and concise.`;
+
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+      },
+    });
+
+    const recommendations = JSON.parse(response.text);
+    return { success: true, data: recommendations };
+  } catch (error) {
+    console.error("Gemini Competitor Recommendations Error:", error.message);
+    return { success: false, error: error.message };
+  }
+}

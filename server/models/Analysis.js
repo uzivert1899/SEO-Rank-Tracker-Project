@@ -22,6 +22,12 @@ const analysisSchema = new mongoose.Schema(
       required: true,
     },
     url: { type: String, required: true },
+    shareId: {
+      type: String,
+      unique: true,
+      sparse: true,
+      index: true,
+    },
     overallScore: { type: Number, min: 0, max: 100, default: 0 },
     categories: {
       seo: { type: Number, default: 0 },

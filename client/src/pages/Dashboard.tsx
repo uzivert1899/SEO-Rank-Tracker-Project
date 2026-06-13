@@ -1,5 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useInView } from "react-intersection-observer";
+import { useCountUp } from "react-countup";
 import {
   SearchIcon,
   ArrowRightIcon,
@@ -23,6 +25,72 @@ interface AnalysisSummary {
     accessibility: number;
     bestPractices: number;
   };
+}
+
+interface StatCardProps {
+  icon: React.ReactNode;
+  value: number;
+  label: string;
+  duration: number;
+  scoreClass?: string;
+  isFreeUser?: boolean;
+}
+
+function StatCard({
+  icon,
+  value,
+  label,
+  duration,
+  scoreClass,
+  isFreeUser,
+}: StatCardProps) {
+  const { ref, inView } = useInView({ threshold: 0.5, triggerOnce: true });
+  const spanRef = useRef<HTMLElement | null>(null);
+
+  const { start, reset, update } = useCountUp({
+    ref: spanRef,
+    end: value === -1 ? 0 : value,
+    duration,
+    startOnMount: false,
+    enableReinitialize: true,
+  });
+
+  useEffect(() => {
+    if (inView) {
+      start();
+    } else {
+      reset();
+    }
+  }, [inView, start, reset]);
+
+  useEffect(() => {
+    if (inView) {
+      update(value === -1 ? 0 : value);
+    }
+  }, [value, inView, update]);
+
+  return (
+    <div
+      ref={ref}
+      className="glass rounded-2xl p-5 flex items-center gap-4 transition-all duration-200 hover:-translate-y-1 hover:shadow-xl"
+    >
+      <div
+        className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+          label === "Avg Score" || label === "Total Scans"
+            ? "bg-primary/10 text-primary"
+            : "bg-accent/10 text-accent"
+        }`}
+      >
+        {icon}
+      </div>
+      <div>
+        <p className={`text-2xl font-bold ${scoreClass || "text-foreground"}`}>
+          {value === -1 && !isFreeUser ? "∞" : <span ref={spanRef as any} />}
+        </p>
+        <p className="text-xs text-muted-foreground">{label}</p>
+      </div>
+    </div>
+  );
 }
 
 export default function Dashboard() {
@@ -106,7 +174,7 @@ export default function Dashboard() {
             </div>
             <button
               type="submit"
-              className="bg-primary px-5 py-3 rounded-full text-primary-foreground text-sm hover:opacity-90 transition-opacity shrink-0 flex items-center gap-2"
+              className="bg-primary px-5 py-3 rounded-full text-primary-foreground text-sm hover:scale-[1.02] active:scale-95 transition-all duration-150 shrink-0 flex items-center gap-2"
               style={{ color: "var(--background)" }}
               id="dashboard-analyze-btn"
             >
@@ -118,41 +186,26 @@ export default function Dashboard() {
 
         {/* Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
-          <div className="glass rounded-2xl p-5 flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-              <GlobeIcon size={22} />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-foreground">
-                {analyses.length}
-              </p>
-              <p className="text-xs text-muted-foreground">Total Scans</p>
-            </div>
-          </div>
-          <div className="glass rounded-2xl p-5 flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-              <TrendingUpIcon size={22} />
-            </div>
-            <div>
-              <p className={`text-2xl font-bold ${getScoreClass(avgScore)}`}>
-                {avgScore}
-              </p>
-              <p className="text-xs text-muted-foreground">Avg Score</p>
-            </div>
-          </div>
-          <div className="glass rounded-2xl p-5 flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center text-accent">
-              <BarChart3Icon size={22} />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-foreground">
-                {user?.plan === "free"
-                  ? `${5 - (user?.analysisCount || 0)}`
-                  : "∞"}
-              </p>
-              <p className="text-xs text-muted-foreground">Scans Left Today</p>
-            </div>
-          </div>
+          <StatCard
+            icon={<GlobeIcon size={22} />}
+            value={analyses.length}
+            label="Total Scans"
+            duration={1.5}
+          />
+          <StatCard
+            icon={<TrendingUpIcon size={22} />}
+            value={avgScore}
+            label="Avg Score"
+            duration={1.5}
+            scoreClass={getScoreClass(avgScore)}
+          />
+          <StatCard
+            icon={<BarChart3Icon size={22} />}
+            value={user?.plan === "free" ? 5 - (user?.analysisCount || 0) : -1}
+            label="Scans Left Today"
+            duration={1.5}
+            isFreeUser={user?.plan === "free"}
+          />
         </div>
 
         {/* Recent Analyses */}
