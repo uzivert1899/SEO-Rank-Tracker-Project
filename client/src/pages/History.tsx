@@ -11,7 +11,7 @@ import {
   ArrowUpDown,
 } from "lucide-react";
 import ScoreGauge from "../components/ScoreGauge";
-import { dummyAnalysisData } from "../assets/assets";
+
 import { useApp } from "../context/AppContext";
 
 interface AnalysisItem {

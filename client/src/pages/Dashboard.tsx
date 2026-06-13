@@ -10,7 +10,7 @@ import {
   TrendingUpIcon,
 } from "lucide-react";
 import AnalysesCard from "../components/AnalysesCard";
-import { dummyAnalysisData } from "../assets/assets";
+
 import { useApp } from "../context/AppContext";
 
 interface AnalysisSummary {
@@ -45,7 +45,7 @@ function StatCard({
   isFreeUser,
 }: StatCardProps) {
   const { ref, inView } = useInView({ threshold: 0.5, triggerOnce: true });
-  const spanRef = useRef<HTMLElement | null>(null);
+  const spanRef = useRef<HTMLElement>(null!);
 
   const { start, reset, update } = useCountUp({
     ref: spanRef,
